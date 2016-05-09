@@ -82,11 +82,12 @@ class SimpleActorMessageJob extends Job {
        * so this casting (and the initial save into the map) may involve boxing.
        **/
       val msg = dataMap.get("message")
+      val jobExec = JobExecution(msg, context)
       val log = Logging(logBus, this)
       log.debug("Triggering job '{}', sending '{}' to '{}'", key.getName, msg, receiver)
       receiver match {
-        case ref: ActorRef => ref ! msg
-        case selection: ActorSelection => selection ! msg
+        case ref: ActorRef => ref ! jobExec
+        case selection: ActorSelection => selection ! jobExec
         case _ => throw new JobExecutionException("receiver as not expected type, must be ActorRef or ActorSelection, was %s".format(receiver.getClass))
       }
     } catch {
